@@ -1,4 +1,4 @@
-package com.google.android.gms.location.sample.locationupdates;
+package com.lyterk.location_updates;
 
 import android.app.Activity;
 import android.location.Location;
@@ -26,17 +26,17 @@ import java.util.Date;
 public class MainActivity extends ActionBarActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
-    protected static final String TAG = "location-updates-sample";
-
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
-            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+    protected static final String TAG = "com.lyterk.location_updates.MainActivity";
 
     protected final static String REQUESTING_LOCATION_UPDATES_KEY = "requesting-location-updates-key";
     protected final static String LOCATION_KEY = "location-key";
     protected final static String LAST_UPDATED_TIME_STRING_KEY = "last-updated-time-string-key";
 
-    protected GoogleApiClient mGoogleApiClient;
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
+            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+
+    protected GoogleApiClient mGoogleApiClient; // This needs to update in tandem with GpsActions
 
     protected LocationRequest mLocationRequest;
 
@@ -44,12 +44,12 @@ public class MainActivity extends ActionBarActivity implements
 
     protected Button mStartUpdatesButton;
     protected Button mStopUpdatesButton;
+    protected Button mPostingButton;
     protected TextView mLastUpdateTimeTextView;
     protected TextView mLatitudeTextView;
     protected TextView mLongitudeTextView;
-    protected TextView mIsInternetConnected;
 
-    protected Boolean mRequestingLocationUpdates;
+    protected Boolean mRequestingLocationUpdates = false;
 
     protected String mLastUpdateTime;
 
@@ -62,40 +62,60 @@ public class MainActivity extends ActionBarActivity implements
 
         }
 
-        // Locate the UI widgets.
-        mStartUpdatesButton = (Button) findViewById(R.id.start_updates_button);
-        mStopUpdatesButton = (Button) findViewById(R.id.stop_updates_button);
-        mLatitudeTextView = (TextView) findViewById(R.id.latitude_text);
-        mLongitudeTextView = (TextView) findViewById(R.id.longitude_text);
-        mLastUpdateTimeTextView = (TextView) findViewById(R.id.last_update_time_text);
+        findUis();
 
-        mRequestingLocationUpdates = false;
         mLastUpdateTime = "";
 
         // Update values using data stored in the Bundle.
-        GpsActions.updateValuesFromBundle(savedInstanceState);
+        updateValuesFromBundle(savedInstanceState);
 
         // Kick off the process of building a GoogleApiClient and requesting the LocationServices
         // API.
         buildGoogleApiClient();
     }
 
-    public boolean isInternetConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected())
-            return true;
-        else
-            return false;
+
+    private void findUis() {
+        mStartUpdatesButton = (Button) findViewById(R.id.start_updates_button);
+        mStopUpdatesButton = (Button) findViewById(R.id.stop_updates_button);
+        mPostingButton = (Button) findViewById(R.id.post_button);
+        mLatitudeTextView = (TextView) findViewById(R.id.latitude_text);
+        mLongitudeTextView = (TextView) findViewById(R.id.longitude_text);
+        mLastUpdateTimeTextView = (TextView) findViewById(R.id.last_update_time_text);
     }
 
-    public void onClick(View view) {
-        switch(view.getId()) {
-            case R.id.post_button:
-                if (!validate())
+    protected void updateValuesFromBundle(Bundle savedInstanceState) {
+        Log.i(TAG, "Updating values from bundle");
+        if (savedInstanceState != null) {
+            if (savedInstanceState.keySet().contains(REQUESTING_LOCATION_UPDATES_KEY)) {
+                mRequestingLocationUpdates = savedInstanceState.getBoolean(
+                        REQUESTING_LOCATION_UPDATES_KEY);
+                setButtonsEnabledState();
+            }
 
+            if (savedInstanceState.keySet().contains(LOCATION_KEY)) {
+                // Since LOCATION_KEY was found in the Bundle, we can be sure that mCurrentLocation
+                // is not null.
+                mCurrentLocation = savedInstanceState.getParcelable(LOCATION_KEY);
+            }
 
+            if (savedInstanceState.keySet().contains(LAST_UPDATED_TIME_STRING_KEY)) {
+                mLastUpdateTime = savedInstanceState.getString(LAST_UPDATED_TIME_STRING_KEY);
+            }
+
+            LocationData locationData = new LocationData(mCurrentLocation, mLastUpdateTime);
+            Posting posting = new Posting(locationData);
+            posting.onClick(mPostingButton);
+
+            updateUI(locationData);
         }
+    }
+
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -108,11 +128,13 @@ public class MainActivity extends ActionBarActivity implements
         createLocationRequest();
     }
 
-    protected void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
-        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    public boolean isInternetConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected())
+            return true;
+        else
+            return false;
     }
 
     public void startUpdatesButtonHandler(View view) {
@@ -138,21 +160,13 @@ public class MainActivity extends ActionBarActivity implements
                 mGoogleApiClient, mLocationRequest, this);
     }
 
-    private void setButtonsEnabledState() {
+    public void setButtonsEnabledState() {
         if (mRequestingLocationUpdates) {
             mStartUpdatesButton.setEnabled(false);
             mStopUpdatesButton.setEnabled(true);
         } else {
             mStartUpdatesButton.setEnabled(true);
             mStopUpdatesButton.setEnabled(false);
-        }
-    }
-
-    private void updateUI() {
-        if (mCurrentLocation != null) {
-            mLatitudeTextView.setText();
-            mLongitudeTextView.setText();
-            mLastUpdateTimeTextView.setText(mLastUpdateTime);
         }
     }
 
@@ -196,7 +210,12 @@ public class MainActivity extends ActionBarActivity implements
         if (mCurrentLocation == null) {
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-            updateUI();
+            LocationData locationData = new LocationData(mCurrentLocation, DateFormat.getTimeInstance().format(new Date()));
+
+            Posting posting = new Posting(locationData);
+            posting.onClick(mPostingButton);
+
+            updateUI(locationData);
         }
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
@@ -205,11 +224,12 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     public void onLocationChanged(Location location) {
-        mCurrentLocation = location;
-        mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        updateUI();
-        Toast.makeText(this, getResources().getString(R.string.location_updated_message),
-                Toast.LENGTH_SHORT).show();
+        LocationData locationData = new LocationData(location, DateFormat.getTimeInstance().format(new Date()));
+
+        Posting posting = new Posting(locationData);
+        posting.onClick(mPostingButton);
+
+        updateUI(locationData);
     }
 
     @Override
@@ -225,11 +245,22 @@ public class MainActivity extends ActionBarActivity implements
         Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
     }
 
-
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY, mRequestingLocationUpdates);
         savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
         savedInstanceState.putString(LAST_UPDATED_TIME_STRING_KEY, mLastUpdateTime);
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+    protected void updateUI(LocationData location_data) {
+        if (mCurrentLocation != null) {
+            mLatitudeTextView.setText(location_data.mLatitude);
+            mLongitudeTextView.setText(location_data.mLongitude);
+            mLastUpdateTimeTextView.setText(location_data.mLastUpdateTime);
+        }
+    }
+
+    public void toastSend() {
+        Toast.makeText(getBaseContext(), "Data Sent", Toast.LENGTH_LONG).show();
     }
 }

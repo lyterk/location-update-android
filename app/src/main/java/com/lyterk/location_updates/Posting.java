@@ -1,8 +1,11 @@
-package com.google.android.gms.location.sample.locationupdates;
+package com.lyterk.location_updates;
 
+import android.content.ContextWrapper;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -20,31 +23,30 @@ public class Posting {
 
     String mLatitude;
     String mLongitude;
-    String time;
+    String mTime;
 
-    public Posting(Location currentLocation, String lastUpdateTime) {
-        Location coordinate;
-        coordinate = currentLocation;
-        time = lastUpdateTime;
+    private static final String TAG = "com.lyterk.location_updates.Posting";
 
-        mLatitude = Double.toString(coordinate.getLatitude());
-        mLongitude = Double.toString(coordinate.getLongitude());
+    public Posting(LocationData location) {
+        this.mLatitude = location.mLatitude;
+        this.mLongitude = location.mLongitude;
+        this.mTime = location.mLastUpdateTime;
     }
 
-    public static String POST(String url, String mLatitude, String mLongitude, String time) {
+    public static String POST(String url, String latitude, String longitude, String time) {
 
-        InputStream mInputStream = null;
+        InputStream mInputStream;
         String result = "";
 
         try {
             HttpClient mHttpClient = new DefaultHttpClient();
             HttpPost mHttpPost = new HttpPost(url);
-            String json = "";
+            String json;
 
             JSONObject mJsonObject = new JSONObject();
 
-            mJsonObject.accumulate("latitude", mLatitude);
-            mJsonObject.accumulate("longitude", mLongitude);
+            mJsonObject.accumulate("latitude", latitude);
+            mJsonObject.accumulate("longitude", longitude);
             mJsonObject.accumulate("time", time);
 
             json = mJsonObject.toString();
@@ -71,16 +73,39 @@ public class Posting {
     }
 
     private class HttpAsyncTask extends AsyncTask<String, Void, String> {
+
         @Override
         protected String doInBackground (String... urls) {
+            Log.d("shouldbepostingdata", POST(urls[0], mLatitude, mLongitude, mTime));
+            return POST(urls[0], mLatitude, mLongitude, mTime);
+        }
 
+        protected void onPostExecute(String result) {
+            Log.d(TAG, "Data sent");
         }
     }
 
-    private boolean validate (Location coordinate) {
-        if (coordinate != null)
+
+    public void onClick(View view) {
+        switch(view.getId()) {
+            case R.id.post_button:
+                if (!validate()) {
+                    Log.e(TAG, "No data there to send");
+                }
+                new HttpAsyncTask().execute("@string/posting_url");
+            break;
+        }
+    }
+
+    private boolean validate () {
+        if (mLatitude == null)
+            return false;
+        else if (mLongitude == null)
+            return false;
+        else if (mTime == null)
+            return false;
+        else
             return true;
-        return false;
     }
 
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
