@@ -79,7 +79,7 @@ public class Posting {
             Log.d("shouldbepostingdata", POST(urls[0], mLatitude, mLongitude, mTime));
             return POST(urls[0], mLatitude, mLongitude, mTime);
         }
-
+        @Override
         protected void onPostExecute(String result) {
             Log.d(TAG, "Data sent");
         }
@@ -92,7 +92,7 @@ public class Posting {
                 if (!validate()) {
                     Log.e(TAG, "No data there to send");
                 }
-                new HttpAsyncTask().execute("@string/posting_url");
+                new HttpAsyncTask().execute("testurl.com");
             break;
         }
     }
@@ -105,6 +105,7 @@ public class Posting {
         else if (mTime == null)
             return false;
         else
+            Log.d(TAG, "validate return true");
             return true;
     }
 
