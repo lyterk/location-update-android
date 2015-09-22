@@ -4,10 +4,21 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationListener;
 
-public class LocationApiLogic {
+import java.text.DateFormat;
+import java.util.Date;
+
+public class LocationApiLogic
+    implements ConnectionCallbacks,
+               OnConnectionFailedListener,
+               LocationListener {
 
     private Bundle savedInstanceState;
     private Ui ui;
@@ -15,6 +26,8 @@ public class LocationApiLogic {
     public LocationApiLogic(Bundle bundle, Ui mainUiInstance) {
         this.savedInstanceState = bundle;
         this.ui = mainUiInstance;
+
+        updateValuesFromBundle(savedInstanceState);
     }
 
     private final static String TAG = "com.lyterk.location_updates.LocationApiLogic";
@@ -39,8 +52,9 @@ public class LocationApiLogic {
 
     protected String mLastUpdateTime;
 
-    protected void updateValuesFromBundle(Bundle savedInstanceState) {
-        Log.i(TAG, "Updating values from bundle");
+    public Boolean getRequestingLocationUpdates() { return mRequestingLocationUpdates; }
+
+    protected void updateValuesFromBundle(Bundle savedInstanceState) {        
         if (savedInstanceState != null) {
             if (savedInstanceState.keySet().contains(REQUESTING_LOCATION_UPDATES_KEY)) {
                 mRequestingLocationUpdates = savedInstanceState.getBoolean(
@@ -58,11 +72,78 @@ public class LocationApiLogic {
                 mLastUpdateTime = savedInstanceState.getString(LAST_UPDATED_TIME_STRING_KEY);
             }
 
-            LocationData locationData = new LocationData(mCurrentLocation, mLastUpdateTime);
+            final LocationData locationData = new LocationData(mCurrentLocation, mLastUpdateTime);
+            final Posting posting = new Posting(locationData);
+            posting.onClick(mPostingButton);
+        }
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        createLocationRequest();
+    }
+
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    protected void startLocationUpdates() {
+        // The final argument to {@code requestLocationUpdates()} is a LocationListener
+        // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                                                                 mGoogleApiClient, mLocationRequest, this);
+    }
+
+    protected void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+    }
+    
+    @Override
+    public void onLocationChanged(Location location) {
+        LocationData locationData = new LocationData(location, DateFormat.getTimeInstance().format(new Date()));
+
+        Posting posting = new Posting(locationData);
+        posting.onClick(mPostingButton);
+
+        ui.updateUI(locationData);
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        Log.i(TAG, "Connected to GoogleApiClient");
+        if (mCurrentLocation == null) {
+            mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+            LocationData locationData = new LocationData(mCurrentLocation, DateFormat.getTimeInstance().format(new Date()));
+
             Posting posting = new Posting(locationData);
             posting.onClick(mPostingButton);
 
-            updateUI(locationData);
+            ui.updateUI(locationData);
         }
+        if (mRequestingLocationUpdates) {
+            startLocationUpdates();
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
+        // onConnectionFailed.
+        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+    }
+
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        Log.i(TAG, "Connection suspended");
+        mGoogleApiClient.connect();
     }
 }

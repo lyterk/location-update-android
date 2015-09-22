@@ -3,11 +3,11 @@ package com.lyterk.location_updates;
 import android.location.Location;
 
 public class LocationData {
-    Location mCurrentLocation;
-    String mLastUpdateTime;
 
-    String mLatitude;
-    String mLongitude;
+    public final Location mCurrentLocation;
+    public final String mLastUpdateTime;
+    public final String mLatitude;
+    public final String mLongitude;
 
     public LocationData(Location location, String time) {
         mLatitude = Double.toString(location.getLatitude());
