@@ -1,11 +1,8 @@
 package com.lyterk.location_updates;
 
-import android.content.ContextWrapper;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

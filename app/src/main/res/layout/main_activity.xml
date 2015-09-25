@@ -11,8 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_marginTop="@dimen/ui_group_top_margin"
-        android:onClick="startUpdatesButtonHandler"
-        android:text="@string/start_updates" />
+        android:text="@string/start_updates"
+        android:onClick="startUpdatesButtonHandler" />
 
     <Button
         android:id="@+id/stop_updates_button"
@@ -21,8 +21,8 @@
         android:layout_alignParentRight="true"
         android:layout_marginTop="@dimen/ui_group_top_margin"
         android:enabled="false"
-        android:onClick="stopUpdatesButtonHandler"
-        android:text="@string/stop_updates" />
+        android:text="@string/stop_updates"
+        android:onClick="stopUpdatesButtonHandler" />
 
     <TextView
         android:id="@+id/latitude_label"
@@ -89,7 +89,8 @@
         android:layout_alignRight="@+id/start_updates_button"
         android:layout_alignEnd="@+id/start_updates_button"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentStart="true"
+        android:onClick="postButtonHandler"/>
 
 
 </RelativeLayout>

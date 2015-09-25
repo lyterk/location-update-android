@@ -2,6 +2,8 @@ package com.lyterk.location_updates;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
+import android.view.View;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -10,51 +12,78 @@ public class MainActivity extends ActionBarActivity {
     protected final static String REQUESTING_LOCATION_UPDATES_KEY = "requesting-location-updates-key";
     protected final static String LOCATION_KEY = "location-key";
     protected final static String LAST_UPDATED_TIME_STRING_KEY = "last-updated-time-string-key";
+    private LocationController mController;
+    private View view;
+    private Ui ui;
+    private Boolean mRequestingLocationUpdates;
 
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.main_activity);
+        Ui ui = new Ui(view);
 
-        Ui ui = new Ui();
-        LocationApiLogic lal = new LocationApiLogic(savedInstanceState, ui);
+        mController = new LocationController(savedInstanceState, ui);
 
-        lal.buildGoogleApiClient();
+        mController.buildGoogleApiClient();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+        mController.mGoogleApiClient.connect();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
-            startLocationUpdates();
+        mRequestingLocationUpdates = ui.getRequestingLocationUpdates();
+        if (mController.mGoogleApiClient.isConnected()
+                && mRequestingLocationUpdates) {
+            mController.startLocationUpdates();
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mGoogleApiClient.isConnected()) {
-            stopLocationUpdates();
+        if (mController.mGoogleApiClient.isConnected()) {
+            mController.stopLocationUpdates();
         }
     }
 
     @Override
     protected void onStop() {
-        mGoogleApiClient.disconnect();
+        mController.mGoogleApiClient.disconnect();
         
         super.onStop();
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        lal.
-        savedInstanceState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY, mRequestingLocationUpdates);
-        savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
-        savedInstanceState.putString(LAST_UPDATED_TIME_STRING_KEY, mLastUpdateTime);
+        mRequestingLocationUpdates = ui.getRequestingLocationUpdates();
+        savedInstanceState.putBoolean
+                (REQUESTING_LOCATION_UPDATES_KEY, mRequestingLocationUpdates);
+        savedInstanceState.putParcelable(LOCATION_KEY, mController.mCurrentLocation);
+        savedInstanceState.putString(LAST_UPDATED_TIME_STRING_KEY, mController.mLastUpdateTime);
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+    public void startUpdatesButtonHandler(View view) {
+        if (!mRequestingLocationUpdates) {
+            mRequestingLocationUpdates = true;
+            ui.setButtonsEnabledState();
+            mController.startLocationUpdates();
+        }
+    }
+
+    public void stopUpdatesButtonHandler(View view) {
+        if (mRequestingLocationUpdates) {
+            mRequestingLocationUpdates = false;
+            ui.setButtonsEnabledState();
+            mController.stopLocationUpdates();
+        }
+    }
+
+    public void postingButtonHandler(View view) {
+        Log.d(TAG, "posted");
     }
 }

@@ -1,32 +1,41 @@
 package com.lyterk.location_updates;
 
+import android.content.Context;
 import android.widget.Button;
 import android.widget.TextView;
 import android.view.View;
 
 public class Ui {
     
-    protected Button mStartUpdatesButton;
-    protected Button mStopUpdatesButton;
-    protected Button mPostingButton;
-    protected TextView mLatitudeTextView;
-    protected TextView mLongitudeTextView;
-    protected TextView mLastUpdateTimeTextView;   
+    private Button mStartUpdatesButton;
+    private Button mStopUpdatesButton;
+    private Button mPostingButton;
+    private TextView mLatitudeTextView;
+    private TextView mLongitudeTextView;
+    private TextView mLastUpdateTimeTextView;
 
-    private Boolean mRequestingLocationUpdates;
+    private Boolean mRequestingLocationUpdates = false;
 
-    public Ui () {
-        setContentView(R.layout.main_activity);
-        findUi();
+    public Boolean getRequestingLocationUpdates() {
+        return this.mRequestingLocationUpdates;
     }
 
-    public void findUi() {
-        mStartUpdatesButton = (Button) findViewById(R.id.start_updates_button);
-        mStopUpdatesButton = (Button) findViewById(R.id.stop_updates_button);
-        mPostingButton = (Button) findViewById(R.id.post_button);
-        mLatitudeTextView = (TextView) findViewById(R.id.latitude_text);
-        mLongitudeTextView = (TextView) findViewById(R.id.longitude_text);
-        mLastUpdateTimeTextView = (TextView) findViewById(R.id.last_update_time_text);
+    public void setRequestingLocationUpdates(Boolean rlu) {
+        this.mRequestingLocationUpdates = rlu;
+    }
+
+
+    public Ui (View view) {
+        findUi(view);
+    }
+
+    private void findUi(View view) {
+        mStartUpdatesButton = (Button) view.findViewById(R.id.start_updates_button);
+        mStopUpdatesButton = (Button) view.findViewById(R.id.stop_updates_button);
+        mPostingButton = (Button) view.findViewById(R.id.post_button);
+        mLatitudeTextView = (TextView) view.findViewById(R.id.latitude_text);
+        mLongitudeTextView = (TextView) view.findViewById(R.id.longitude_text);
+        mLastUpdateTimeTextView = (TextView) view.findViewById(R.id.last_update_time_text);
     }
 
     public void setButtonsEnabledState() {
@@ -39,27 +48,11 @@ public class Ui {
         }
     }
 
-    public void updateUI(LocationData locationData) {
-        if (locationData.mCurrentLocation != null) {
-            mLatitudeTextView.setText(locationData.mLatitude);
-            mLongitudeTextView.setText(locationData.mLongitude);
-            mLastUpdateTimeTextView.setText(locationData.mLastUpdateTime);
-        }
-    }
-
-    public void startUpdatesButtonHandler(View view) {
-        if (!mRequestingLocationUpdates) {
-            mRequestingLocationUpdates = true;
-            setButtonsEnabledState();
-            startLocationUpdates();
-        }
-    }
-
-    public void stopUpdatesButtonHandler(View view) {
-        if (mRequestingLocationUpdates) {
-            mRequestingLocationUpdates = false;
-            setButtonsEnabledState();
-            stopLocationUpdates();
+    public void updateUI(LocationData mLocationData) {
+        if (mLocationData.mCurrentLocation != null) {
+            mLatitudeTextView.setText(mLocationData.mLatitude);
+            mLongitudeTextView.setText(mLocationData.mLongitude);
+            mLastUpdateTimeTextView.setText(mLocationData.mLastUpdateTime);
         }
     }
 }
