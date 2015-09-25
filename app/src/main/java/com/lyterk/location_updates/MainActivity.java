@@ -2,7 +2,6 @@ package com.lyterk.location_updates;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.View;
 
 public class MainActivity extends ActionBarActivity {
@@ -67,23 +66,12 @@ public class MainActivity extends ActionBarActivity {
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    public void startUpdatesButtonHandler(View view) {
-        if (!mRequestingLocationUpdates) {
-            mRequestingLocationUpdates = true;
-            ui.setButtonsEnabledState();
-            mController.startLocationUpdates();
-        }
-    }
 
     public void stopUpdatesButtonHandler(View view) {
-        if (mRequestingLocationUpdates) {
-            mRequestingLocationUpdates = false;
-            ui.setButtonsEnabledState();
-            mController.stopLocationUpdates();
-        }
+
     }
 
-    public void postingButtonHandler(View view) {
-        Log.d(TAG, "posted");
+    public void onClick(View view) {
+        mController.clickHandler(view);
     }
 }

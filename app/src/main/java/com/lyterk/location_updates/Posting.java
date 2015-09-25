@@ -60,7 +60,7 @@ public class Posting {
             if (mInputStream != null)
                 result = convertInputStreamToString(mInputStream);
             else
-                result = "Did not work";
+                result = "Input stream is null for some reason";
 
         } catch (Exception e) {
             Log.d("posting.java.POST", e.getLocalizedMessage());
@@ -76,22 +76,15 @@ public class Posting {
             Log.d("shouldbepostingdata", POST(urls[0], mLatitude, mLongitude, mTime));
             return POST(urls[0], mLatitude, mLongitude, mTime);
         }
+
         @Override
         protected void onPostExecute(String result) {
             Log.d(TAG, "Data sent");
         }
     }
 
+    public void postingClick() {
 
-    public void onClick(View view) {
-        switch(view.getId()) {
-            case R.id.post_button:
-                if (!validate()) {
-                    Log.e(TAG, "No data there to send");
-                }
-                new HttpAsyncTask().execute("testurl.com");
-            break;
-        }
     }
 
     private boolean validate () {
@@ -116,4 +109,5 @@ public class Posting {
         inputStream.close();
         return result;
     }
+
 }
