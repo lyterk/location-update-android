@@ -1,6 +1,5 @@
 package com.lyterk.location_updates;
 
-import android.content.Context;
 import android.widget.Button;
 import android.widget.TextView;
 import android.view.View;
@@ -9,7 +8,6 @@ public class Ui {
     
     private Button mStartUpdatesButton;
     private Button mStopUpdatesButton;
-    private Button mPostingButton;
     private TextView mLatitudeTextView;
     private TextView mLongitudeTextView;
     private TextView mLastUpdateTimeTextView;
@@ -25,17 +23,12 @@ public class Ui {
     }
 
 
-    public Ui (View view) {
-        findUi(view);
-    }
-
-    private void findUi(View view) {
-        mStartUpdatesButton = (Button) view.findViewById(R.id.start_updates_button);
-        mStopUpdatesButton = (Button) view.findViewById(R.id.stop_updates_button);
-        mPostingButton = (Button) view.findViewById(R.id.post_button);
-        mLatitudeTextView = (TextView) view.findViewById(R.id.latitude_text);
-        mLongitudeTextView = (TextView) view.findViewById(R.id.longitude_text);
-        mLastUpdateTimeTextView = (TextView) view.findViewById(R.id.last_update_time_text);
+    public Ui (Button startUB, Button stopUB, TextView laTV, TextView loTV, TextView lutTV) {
+        this.mStartUpdatesButton = startUB;
+        this.mStopUpdatesButton = stopUB;
+        this.mLatitudeTextView = laTV;
+        this.mLongitudeTextView = loTV;
+        this.mLastUpdateTimeTextView = lutTV;
     }
 
     public void setButtonsEnabledState() {

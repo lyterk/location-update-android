@@ -2,7 +2,6 @@ package com.lyterk.location_updates;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.View;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -23,6 +22,7 @@ public class Posting {
     String mTime;
 
     private static final String TAG = "com.lyterk.location_updates.Posting";
+    private static final String postUrl = "http://requestb.in/1dkq27f1";
 
     public Posting(LocationData location) {
         this.mLatitude = location.mLatitude;
@@ -84,16 +84,16 @@ public class Posting {
     }
 
     public void postingClick() {
-
+        if (!validate()) {
+            Log.d(TAG, "Validate failed. No location data");
+        }
+        new HttpAsyncTask().execute(postUrl);
     }
 
     private boolean validate () {
-        if (mLatitude == null)
+        if (mLatitude == null || mLongitude == null || mTime == null) {
             return false;
-        else if (mLongitude == null)
-            return false;
-        else if (mTime == null)
-            return false;
+        }
         else
             Log.d(TAG, "validate return true");
             return true;

@@ -3,6 +3,8 @@ package com.lyterk.location_updates;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -16,14 +18,33 @@ public class MainActivity extends ActionBarActivity {
     private Ui ui;
     private Boolean mRequestingLocationUpdates;
 
+    private Button mStartUpdatesButton;
+    private Button mStopUpdatesButton;
+    private TextView mLatitudeTextView;
+    private TextView mLongitudeTextView;
+    private TextView mLastUpdateTimeTextView;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-        Ui ui = new Ui(view);
+        findUi();
+        ui = new Ui(mStartUpdatesButton,
+                mStopUpdatesButton,
+                mLatitudeTextView,
+                mLongitudeTextView,
+                mLastUpdateTimeTextView);
 
-        mController = new LocationController(savedInstanceState, ui);
+        mController = new LocationController(savedInstanceState, ui, this);
 
-        mController.buildGoogleApiClient();
+        mController.buildGoogleApiClient(this);
+    }
+
+    private void findUi() {
+        mStartUpdatesButton = (Button) findViewById(R.id.start_updates_button);
+        mStopUpdatesButton = (Button) findViewById(R.id.stop_updates_button);
+        mLatitudeTextView = (TextView) findViewById(R.id.latitude_text);
+        mLongitudeTextView = (TextView) findViewById(R.id.longitude_text);
+        mLastUpdateTimeTextView = (TextView) findViewById(R.id.last_update_time_text);
     }
 
     @Override
@@ -64,11 +85,6 @@ public class MainActivity extends ActionBarActivity {
         savedInstanceState.putParcelable(LOCATION_KEY, mController.mCurrentLocation);
         savedInstanceState.putString(LAST_UPDATED_TIME_STRING_KEY, mController.mLastUpdateTime);
         super.onSaveInstanceState(savedInstanceState);
-    }
-
-
-    public void stopUpdatesButtonHandler(View view) {
-
     }
 
     public void onClick(View view) {

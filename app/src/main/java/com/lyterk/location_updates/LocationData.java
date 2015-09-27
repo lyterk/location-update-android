@@ -11,8 +11,8 @@ public class LocationData {
 
     public LocationData(Location location, String time) {
         mLatitude = Double.toString(location.getLatitude());
-        mLongitude = Double.toString(location.getLongitude());
-
+        mLongitude = Double.toString(location.getLongitude());        
+        
         this.mCurrentLocation = location;
         this.mLastUpdateTime = time;
     }
