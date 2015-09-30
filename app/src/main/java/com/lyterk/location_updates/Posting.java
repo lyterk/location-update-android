@@ -1,5 +1,9 @@
 package com.lyterk.location_updates;
 
+// TODO Posts are duplicated. The first one in the 'batch' that was created is the only one sent. Figure out why.
+
+// TODO Posting may be broken. Find out why.
+
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -22,7 +26,7 @@ public class Posting {
     String mTime;
 
     private static final String TAG = "com.lyterk.location_updates.Posting";
-    private static final String postUrl = "http://requestb.in/1dkq27f1";
+    private static final String postUrl = "http://requestb.in/u6x89uu6";
 
     public Posting(LocationData location) {
         this.mLatitude = location.mLatitude;
@@ -73,7 +77,6 @@ public class Posting {
 
         @Override
         protected String doInBackground (String... urls) {
-            Log.d("shouldbepostingdata", POST(urls[0], mLatitude, mLongitude, mTime));
             return POST(urls[0], mLatitude, mLongitude, mTime);
         }
 
@@ -95,7 +98,6 @@ public class Posting {
             return false;
         }
         else
-            Log.d(TAG, "validate return true");
             return true;
     }
 

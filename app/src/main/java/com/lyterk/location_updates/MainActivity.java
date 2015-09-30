@@ -1,5 +1,7 @@
 package com.lyterk.location_updates;
 
+// TODO Figure out how to publish to Play Store.
+
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;

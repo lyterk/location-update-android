@@ -14,9 +14,6 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationListener;
 
-import java.text.DateFormat;
-import java.util.Date;
-
 public class LocationController
     implements ConnectionCallbacks,
                OnConnectionFailedListener,
@@ -72,7 +69,7 @@ public class LocationController
                 mLastUpdateTime = savedInstanceState.getString(LAST_UPDATED_TIME_STRING_KEY);
             }
 
-            mLocationData = new LocationData(mCurrentLocation, mLastUpdateTime);
+            mLocationData = new LocationData(mCurrentLocation);
             mPosting = new Posting(mLocationData);
             // mPosting.onClick(mPostingButton);
         }
@@ -106,7 +103,7 @@ public class LocationController
     
     @Override
     public void onLocationChanged(Location location) {
-        mLocationData = new LocationData(location, DateFormat.getTimeInstance().format(new Date()));
+        mLocationData = new LocationData(location);
 
         ui.updateUI(mLocationData);
     }
@@ -116,9 +113,9 @@ public class LocationController
         Log.i(TAG, "Connected to GoogleApiClient");
         if (mCurrentLocation == null) {
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-            LocationData mLocationData = new LocationData(mCurrentLocation, DateFormat.getTimeInstance().format(new Date()));
-            mPosting = new Posting(mLocationData);
+        } else {
+            LocationData mLocationData = new LocationData(mCurrentLocation);
+            // mPosting = new Posting(mLocationData);
             ui.updateUI(mLocationData);
         }
         mRequestingLocationUpdates = ui.getRequestingLocationUpdates();
