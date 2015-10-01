@@ -39,6 +39,8 @@ public class MainActivity extends ActionBarActivity {
         mController = new LocationController(savedInstanceState, ui, this);
 
         mController.buildGoogleApiClient(this);
+
+        Dao dao = new Dao(this);
     }
 
     private void findUi() {

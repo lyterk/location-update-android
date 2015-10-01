@@ -14,7 +14,6 @@ public class LocationData {
     public final String mLatitude;
     public final String mLongitude;
     public final Timestamp mSqlDate;
-    private final Date mUtilDate;
 
     public LocationData(Location location) {
         this.mCurrentLocation = location;
@@ -22,7 +21,7 @@ public class LocationData {
         mLatitude = Double.toString(location.getLatitude());
         mLongitude = Double.toString(location.getLongitude());
 
-        mUtilDate = new java.util.Date();
+        final Date mUtilDate = new java.util.Date();
         mLastUpdateTime = DateFormat.getDateTimeInstance().format(mUtilDate);
         mSqlDate = new Timestamp(mUtilDate.getTime());
     }
