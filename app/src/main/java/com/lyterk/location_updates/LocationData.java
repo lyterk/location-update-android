@@ -24,5 +24,7 @@ public class LocationData {
         final Date mUtilDate = new java.util.Date();
         mLastUpdateTime = DateFormat.getDateTimeInstance().format(mUtilDate);
         mSqlDate = new Timestamp(mUtilDate.getTime());
+
+
     }
 }

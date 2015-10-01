@@ -38,15 +38,16 @@ public class LocationController
     protected LocationRequest mLocationRequest;
     protected Location mCurrentLocation;
     protected String mLastUpdateTime;
-    private LocationData mLocationData;
     private Posting mPosting;
     private Context ctx;
     private Bundle savedInstanceState;
+    private Dao dao;
 
-    public LocationController(Bundle bundle, Ui ui, Context ctx) {
+    public LocationController(Bundle bundle, Ui ui, Dao dao, Context ctx) {
         this.savedInstanceState = bundle;
         this.ui = ui;
         this.ctx = ctx;
+        this.dao = dao;
 
         updateValuesFromBundle(savedInstanceState);
     }
@@ -69,8 +70,10 @@ public class LocationController
                 mLastUpdateTime = savedInstanceState.getString(LAST_UPDATED_TIME_STRING_KEY);
             }
 
-            mLocationData = new LocationData(mCurrentLocation);
-            mPosting = new Posting(mLocationData);
+            LocationData ld = new LocationData(mCurrentLocation);
+            dao.insertLocation(ld);
+
+            mPosting = new Posting(ld);
             // mPosting.onClick(mPostingButton);
         }
     }
@@ -114,9 +117,10 @@ public class LocationController
         if (mCurrentLocation == null) {
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         } else {
-            LocationData mLocationData = new LocationData(mCurrentLocation);
+            LocationData ld = new LocationData(mCurrentLocation);
+            dao.insertLocation(ld);
             // mPosting = new Posting(mLocationData);
-            ui.updateUI(mLocationData);
+            ui.updateUI(ld);
         }
         mRequestingLocationUpdates = ui.getRequestingLocationUpdates();
         if (mRequestingLocationUpdates) {

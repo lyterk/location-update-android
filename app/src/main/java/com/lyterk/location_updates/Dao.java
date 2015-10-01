@@ -20,8 +20,9 @@ public class Dao extends SQLiteOpenHelper {
             "TEXT NOT NULL, Time TIMESTAMP NOT NULL);";
     private static final String DROP_IF_EXISTS = "DROP TABLE IF EXISTS " + DICTIONARY_NAME + ";";
 
-    Dao(Context context) {
+    public Dao(Context context) {
         super(context, DICTIONARY_NAME, null, DATABASE_VERSION);
+        db = getWritableDatabase();
     }
 
     @Override
@@ -39,7 +40,7 @@ public class Dao extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void createLocation(LocationData ld) {
+    public void insertLocation(LocationData ld) {
         ContentValues contentValues = new ContentValues();
         contentValues.put("Latitude", ld.mLatitude);
         contentValues.put("Longitude", ld.mLongitude);
@@ -52,23 +53,23 @@ public class Dao extends SQLiteOpenHelper {
         db.delete(DICTIONARY_NAME, "Id = " + locationId, null);
     }
 
-    public List<List<String>> fetchLocationData(Cursor cursor) {
+    public List<List<String>> fetchLocationData() {
         // TODO Figure out how to make fetchLocationData() accept different query params
         Cursor mCursorSelectAll = db.query(DICTIONARY_NAME, tableColumns, null, null, null, null, null);
         String[] tableColumns = {"id", "Latitude", "Longitude", "Time"};
         List queryList = new ArrayList();
 
-        cursor.moveToFirst();
+        mCursorSelectAll.moveToFirst();
 
-        while (!cursor.isAfterLast()) {
+        while (!mCursorSelectAll.isAfterLast()) {
             List<String> rowList = new ArrayList();
-            int index = cursor.getInt(0);
-            rowList.add(cursor.getString(1));
-            rowList.add(cursor.getString(2));
-            rowList.add(cursor.getString(3));
+            int index = mCursorSelectAll.getInt(0);
+            rowList.add(mCursorSelectAll.getString(1));
+            rowList.add(mCursorSelectAll.getString(2));
+            rowList.add(mCursorSelectAll.getString(3));
             queryList.add(rowList);
 
-            cursor.moveToNext();
+            mCursorSelectAll.moveToNext();
         }
         return queryList;
     }

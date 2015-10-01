@@ -16,7 +16,6 @@ public class MainActivity extends ActionBarActivity {
     protected final static String LOCATION_KEY = "location-key";
     protected final static String LAST_UPDATED_TIME_STRING_KEY = "last-updated-time-string-key";
     private LocationController mController;
-    private View view;
     private Ui ui;
     private Boolean mRequestingLocationUpdates;
 
@@ -36,11 +35,11 @@ public class MainActivity extends ActionBarActivity {
                 mLongitudeTextView,
                 mLastUpdateTimeTextView);
 
-        mController = new LocationController(savedInstanceState, ui, this);
+        Dao dao = new Dao(this);
+
+        mController = new LocationController(savedInstanceState, ui, dao, this);
 
         mController.buildGoogleApiClient(this);
-
-        Dao dao = new Dao(this);
     }
 
     private void findUi() {
